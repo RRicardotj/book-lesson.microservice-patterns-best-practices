@@ -16,9 +16,11 @@ import (
 type App struct {
 	DB *sqlx.DB
 	Router *mux.Router
+	Cache Cache
 }
 
-func (a *App) Initialize(db *sqlx.DB) {
+func (a *App) Initialize(cache Cache, db *sqlx.DB) {
+	a.Cache = cache
 	a.DB = db
 	a.Router = mux.NewRouter()
 	a.initializeRoutes()
@@ -59,6 +61,15 @@ func (a *App) getUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// Cache layer
+	if value, err := a.Cache.getValue(id); err == nil && len(value) != 0 {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(value))
+
+		return
+	}
+
 	u := User{ID: id}
 
 	if err := u.get(a.DB); err != nil {
@@ -74,7 +85,7 @@ func (a *App) getUser(w http.ResponseWriter, r *http.Request) {
 	respondWithJSON(w, http.StatusOK, u)
 }
 
-func (a *App) getUses(w http.ResponseWriter, r *http.Request) {
+func (a *App) getUsers(w http.ResponseWriter, r *http.Request) {
 	count, _ := strconv.Atoi(r.FormValue("count"))
 	start, _ := strconv.Atoi(r.FormValue("start"))
 
