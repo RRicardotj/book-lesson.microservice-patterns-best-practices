@@ -9,6 +9,12 @@ import (
 	"os"
 )
 
+const (
+	createUsersQueue = "CREATE_USER"
+	updateUsersQueue = "UPDATE_USER"
+	deleteUsersQueue = "DELETE_USER"
+)
+
 func main() {
 	cache := Cache(Enable: true)
 

@@ -93,3 +93,15 @@ func (cache *Cache) setValue(key interface{}, value interface{}) error {
 
 	return nil
 }
+
+func (cache *Cache) enqueueValue(queue string, uuid int) error {
+	if (cache.Enable) {
+		conn := cache.Pool.Get()
+		defer conn.Close()
+		_, err := conn.Do("RPUSH", queue, uuid)
+
+		return err
+	}
+
+	return nil
+}

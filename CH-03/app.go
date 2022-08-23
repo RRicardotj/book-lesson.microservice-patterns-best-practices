@@ -118,11 +118,30 @@ func (a *App) createUser(w http.ResponseWriter, r *http.Request) {
 
 	defer r.Body.Close()
 
+	// get sequence from postgres
+	a.DB.Get(&user.ID, "SELECT nextval('users_id_seq')")
+
+	JSONByte, _ := json.Marshal(user)
+
+	if err := a.Cache.setValue(user.ID, string(JSONByte)); err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error())
+
+		return
+	}
+
+	if err := a.Cache.enqueueValue(createUsersQueue, user.ID); err != nil {
+		respondWithError(w, http.StatusInternalServerError, err.Error)
+
+		return
+	}
+
+	/* This line was commented when queue was being created
 	if err := u.create(a.DB); err != nil {
 		fmt.Println(err.Error())
 		respondWithError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
+	*/
 
 	respondWithJSON(w, http.StatusCreated, u)
 }
