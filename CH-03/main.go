@@ -60,6 +60,13 @@ func main() {
 		"Redis timeout in seconds"
 	)
 
+	flag.intVar(
+		&numWorkers,
+		"num_workers",
+		10,
+		"Number of workers to consume queue"
+	)
+
 	flag.Parse()
 
 	cache.Pool = cache.NewCachePool()
@@ -76,6 +83,10 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	go UsersToDB(numWorkers, db. cache, createUsersQueue)
+	go UsersToDB(numWorkers, db. cache, updateUsersQueue)
+	go UsersToDB(numWorkers, db. cache, deleteUsersQueue)
 
 	a := App{}
 	a.Initialize(cache, db)

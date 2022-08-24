@@ -60,3 +60,17 @@ func (w Worker) process(id int) {
 		conn.Close()
 	}
 }
+
+func UsersToDB(numWorkers int, db *sql.DB, cache Cache, queue string) {
+	var wg sync.WaitGroup
+
+	for i := 0; i < numWorkers; i++ {
+		wg.Add(1)
+
+		go func(id int, db * sqlx.DB, cache Cache, queue string) {
+			worker := newWorker(i, db, cache, queue)
+			worker.process(i)
+			defer wg.Done()
+		} (i, db, cache, queue)
+	}
+}
