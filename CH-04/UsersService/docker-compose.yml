@@ -36,3 +36,10 @@ services:
     links:
       - users-service-db
       - redis
+  proxy:
+    container_name: userservice_loadbalance
+    build: ./nginx
+    ports:
+      - "80:80"
+    links:
+      - userservice
