@@ -18,7 +18,6 @@ services:
     healthcheck:
       test: exit 0
   userservice:
-    container_name: userservice
     image: userservice
     build: .
     environment:
@@ -34,8 +33,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    ports:
-      - 8080:3000
     links:
       - users-service-db
       - redis
